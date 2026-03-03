@@ -4,10 +4,18 @@ LAN Peer Discovery using UDP broadcast.
 Each node periodically broadcasts its presence on a well-known UDP port.
 All nodes listen on the same port and maintain a list of discovered peers
 (host, port) tuples where ``port`` is the HTTP job-queue endpoint port.
+
+Security note
+-------------
+The UDP listener binds to all interfaces so that it can receive subnet
+broadcast packets.  All incoming announcements are validated against known
+private IP ranges (RFC 1918 / RFC 4193) so that only LAN peers are
+registered.
 """
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import json
 import logging
 import socket
@@ -148,6 +156,11 @@ class PeerDiscovery:
                 if peer is None:
                     continue
 
+                # Reject announcements from non-private (non-LAN) addresses.
+                if not _is_private_address(host):
+                    logger.debug("Ignoring announcement from non-LAN address: %s", host)
+                    continue
+
                 # Don't register ourselves.
                 if peer[1] == self._job_port and _is_local_address(host):
                     continue
@@ -185,4 +198,18 @@ def _is_local_address(host: str) -> bool:
         local_addrs.add("::1")
         return host in local_addrs
     except OSError:
+        return False
+
+
+def _is_private_address(host: str) -> bool:
+    """Return True if *host* is a private / loopback / link-local address.
+
+    Only announcements from private RFC 1918 / RFC 4193 address space are
+    accepted.  This prevents a public-internet peer from registering itself
+    with the local node via a crafted UDP packet.
+    """
+    try:
+        addr = ipaddress.ip_address(host)
+        return addr.is_private or addr.is_loopback or addr.is_link_local
+    except ValueError:
         return False

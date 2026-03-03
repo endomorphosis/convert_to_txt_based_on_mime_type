@@ -19,6 +19,7 @@ import pytest_asyncio
 from external_interface.peer_discovery.peer_discovery import (
     PeerDiscovery,
     _is_local_address,
+    _is_private_address,
 )
 from external_interface.peer_job_drainer.peer_job_drainer import (
     PeerJobDrainer,
@@ -73,6 +74,16 @@ class TestPeerDiscovery:
     def test_local_address_helper(self):
         # 127.0.0.1 should always be considered local
         assert _is_local_address("127.0.0.1") is True
+
+    def test_private_address_helper_private(self):
+        assert _is_private_address("192.168.1.10") is True
+        assert _is_private_address("10.0.0.1") is True
+        assert _is_private_address("172.16.0.1") is True
+        assert _is_private_address("127.0.0.1") is True
+
+    def test_private_address_helper_public(self):
+        assert _is_private_address("8.8.8.8") is False
+        assert _is_private_address("1.1.1.1") is False
 
     @pytest.mark.asyncio
     async def test_start_stop(self):
