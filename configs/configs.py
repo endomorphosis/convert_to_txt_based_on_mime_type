@@ -142,6 +142,11 @@ class Configs(BaseModel):
     use_docintel:             bool = Field(default=False)
     print_configs_on_startup: bool = Field(default=False)
 
+    # LAN peer job-draining settings
+    enable_lan_peer_discovery: bool = Field(default=False)
+    lan_peer_port:             int  = Field(default=8765, ge=1024, le=65535)
+    lan_discovery_port:        int  = Field(default=8766, ge=1024, le=65535)
+
     _logger:           Logger = PrivateAttr(default=None)
     _can_use_llm:      bool = PrivateAttr(default=True)
     _can_use_docintel: bool = PrivateAttr(default=True)
