@@ -12,13 +12,16 @@ from pydantic import BaseModel
 
 from pydantic_models.resource.resource import Resource
 
+
 class Pipeline(BaseModel):
     pass
+
 
 # Wrapper classes for function overloading.
 class ProcessInput(BaseModel):
     resource: Resource
     prefer: str = "processor"
+
 
 class ThreadInput(BaseModel):
     resource: Resource
@@ -42,6 +45,7 @@ async def optimize(resources: Iterable[Resource], *, batch_size=1024) -> AsyncGe
         for input, output in concurrently(input_queue, batch_size, max_concurrency, loop):
             yield output
 
+
 @singledispatch
 async def concurrently(input_queue: asyncio.Queue, batch_size: int, max_concurrency: int = 5):
 
@@ -52,11 +56,11 @@ async def concurrently(input_queue: asyncio.Queue, batch_size: int, max_concurre
 
 
 async def concurrently(
-        inputs: Iterable[ProcessInput] = None, 
-        *, 
-        max_concurrency: int = 5,
-        loop: AbstractEventLoop = None
-        ) -> AsyncGenerator:
+    inputs: Iterable[ProcessInput] = None,
+    *,
+    max_concurrency: int = 5,
+    loop: AbstractEventLoop = None,
+) -> AsyncGenerator:
     """
     Calls the function ``handler`` on the values ``inputs``.
 
@@ -73,7 +77,6 @@ async def concurrently(
     iter_inputs = iter(inputs)
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
-
         # Schedule the first N futures.  We don't want to schedule them all
         # at once, to avoid consuming excessive amounts of memory.
         futures = {
@@ -97,13 +100,11 @@ async def concurrently(
                 future = executor.submit(input.pipeline, input.resource)
                 futures[future] = input
 
+
 @overload
 async def concurrently(
-        inputs: Iterable[ThreadInput], 
-        *, 
-        max_concurrency=5, 
-        loop: AbstractEventLoop = None
-        ):
+    inputs: Iterable[ThreadInput], *, max_concurrency=5, loop: AbstractEventLoop = None
+):
     """
     Calls the function ``handler`` on the values ``inputs``.
 
@@ -136,27 +137,14 @@ async def concurrently(
                 yield original_input, fut.result()
 
             for input in itertools.islice(iter_inputs, len(done)):
-                fut = loop.run_in_executor(
-                    executor, input.pipeline, input.resource
-                )
+                fut = loop.run_in_executor(executor, input.pipeline, input.resource)
                 futures[fut] = input
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @overload
-async def concurrently(handler: Callable | Coroutine, inputs: Iterable, *, max_concurrency=5) -> AsyncGenerator:
+async def concurrently(
+    handler: Callable | Coroutine, inputs: Iterable, *, max_concurrency=5
+) -> AsyncGenerator:
 
     # Wrap the input in a Input class, it isn't already.
     # This is likely being pulled from a generator.
@@ -193,9 +181,7 @@ async def concurrently(handler: Callable | Coroutine, inputs: Iterable, *, max_c
     }
 
     while process_futures and thread_futures:
-        done, _ = concurrent.futures.wait(
-            futures, return_when=concurrent.futures.FIRST_COMPLETED
-        )
+        done, _ = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
 
         for fut in done:
             original_input = futures.pop(fut)
