@@ -4,14 +4,12 @@ import itertools
 from typing import Callable, Iterable, Generator
 
 
-def run_pipeline_in_thread_pool(
-    inputs: Iterable[tuple], max_concurrency=5
-) -> Generator[tuple, None, None]:
+def run_pipeline_in_thread_pool(inputs: Iterable[tuple], max_concurrency=5) -> Generator[tuple, None, None]:
     """
     Runs a pipeline of functions in a process pool.
-
+    
     Args:
-        inputs (Iterable[tuple]): An iterable of tuples.
+        inputs (Iterable[tuple]): An iterable of tuples. 
             The first tuple element is a function, and the second is its input.
     """
     func_inputs = iter(inputs)
@@ -21,11 +19,13 @@ def run_pipeline_in_thread_pool(
         futures = {
             loop.run_in_executor(executor, input[0], input[1]): input
             for input in itertools.islice(func_inputs, max_concurrency)
-            if isinstance(input[0], Callable)  # Filter out non-callable functions
+            if isinstance(input[0], Callable) # Filter out non-callable functions
         }
 
         while futures:
-            done, _ = cf.wait(futures, return_when=cf.FIRST_COMPLETED)
+            done, _ = cf.wait(
+                futures, return_when=cf.FIRST_COMPLETED
+            )
 
             for fut in done:
                 original_input = futures.pop(fut)
@@ -60,7 +60,9 @@ def run_in_thread_pool(handler, inputs, *, max_concurrency=5):
         }
 
         while futures:
-            done, _ = cf.wait(futures, return_when=cf.FIRST_COMPLETED)
+            done, _ = cf.wait(
+                futures, return_when=cf.FIRST_COMPLETED
+            )
 
             for fut in done:
                 original_input = futures.pop(fut)

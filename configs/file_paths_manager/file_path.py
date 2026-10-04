@@ -1,5 +1,6 @@
+
 import os
-from pathlib import Path
+from pathlib import Path 
 from typing import Annotated
 
 
@@ -38,5 +39,4 @@ class FilePath(BaseModel):
         - The file must be of a type we have a converter for.
         - The file's size must be under the memory limit allocated to the program.
     """
-
     file_path: Annotated[Path, AfterValidator(validate_file_path)]

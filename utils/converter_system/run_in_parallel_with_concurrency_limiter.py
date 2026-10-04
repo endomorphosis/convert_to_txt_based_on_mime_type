@@ -10,19 +10,17 @@ async def limiter(task, limit: asyncio.Semaphore = None):
         if isinstance(limit, int):
             limit = asyncio.Semaphore(limit)
         else:
-            raise ValueError(
-                f"The limit must be an instance of asyncio.Semaphore or an integer, not {type(limit)}"
-            )
+            raise ValueError(f"The limit must be an instance of asyncio.Semaphore or an integer, not {type(limit)}")
     async with limit:
         return await task
 
 
 async def run_in_parallel_with_concurrency_limiter(
-    func: Callable | Coroutine = None,
-    input_list: list[Any] = None,
-    concurrency_limit: int = 2,
-    **kwargs: dict,
-) -> None:
+        func: Callable | Coroutine = None,
+        input_list: list[Any] = None,
+        concurrency_limit: int = 2,
+        **kwargs: dict,
+    ) -> None:
     """
     Runs the given function in parallel for each input, with a concurrency limit.
 
@@ -43,9 +41,13 @@ async def run_in_parallel_with_concurrency_limiter(
         - Progress is displayed using tqdm.
         - Each function call receives its input value and any additional kwargs.
     """
-    tasks = [func(inp, **kwargs) for inp in input_list]
+    tasks = [
+        func(inp, **kwargs) for inp in input_list
+    ]
 
-    limited_tasks = [limiter(task, limit=asyncio.Semaphore(concurrency_limit)) for task in tasks]
+    limited_tasks = [
+        limiter(task, limit=asyncio.Semaphore(concurrency_limit)) for task in tasks
+    ]
 
     for future in tqdm_asyncio.tqdm.as_completed(limited_tasks):
         await future

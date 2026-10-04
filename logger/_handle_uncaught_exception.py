@@ -3,7 +3,6 @@ import traceback
 
 
 from .logger import Logger
-
 logger = Logger("UNCAUGHT_EXCEPTION")
 
 

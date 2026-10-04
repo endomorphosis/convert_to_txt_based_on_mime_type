@@ -3,7 +3,6 @@ from enum import Enum
 
 class SupportedApplicationTypes(str, Enum):
     """Supported application types"""
-
     PDF = ".pdf"
     DOCX = ".docx"
     DOC = ".doc"
@@ -27,7 +26,6 @@ class SupportedApplicationTypes(str, Enum):
 
 class SupportedImageTypes(str, Enum):
     """Supported image types"""
-
     JPEG = ".jpeg"
     JPG = ".jpg"
     PNG = ".png"
@@ -43,7 +41,6 @@ class SupportedImageTypes(str, Enum):
 
 class SupportedVideoTypes(str, Enum):
     """Supported video types"""
-
     MP4 = ".mp4"
     AVI = ".avi"
     MOV = ".mov"
@@ -64,7 +61,6 @@ class SupportedVideoTypes(str, Enum):
 
 class SupportedAudioTypes(str, Enum):
     """Supported audio types"""
-
     MP3 = ".mp3"
     WAV = ".wav"
     AAC = ".aac"
@@ -84,7 +80,6 @@ class SupportedAudioTypes(str, Enum):
 
 class SupportedTextTypes(str, Enum):
     """Supported text types"""
-
     TXT = ".txt"
     RTF = ".rtf"
     HTML = ".html"
@@ -109,9 +104,9 @@ class SupportedTextTypes(str, Enum):
 
 
 SupportedMimeTypes: set = (
-    *SupportedApplicationTypes,
-    *SupportedImageTypes,
-    *SupportedVideoTypes,
-    *SupportedAudioTypes,
-    *SupportedTextTypes,
+    *SupportedApplicationTypes, 
+    *SupportedImageTypes, 
+    *SupportedVideoTypes, 
+    *SupportedAudioTypes, 
+    *SupportedTextTypes
 )
